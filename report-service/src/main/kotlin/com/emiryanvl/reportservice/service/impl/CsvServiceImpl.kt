@@ -1,10 +1,12 @@
 package com.emiryanvl.reportservice.service.impl
 
+import com.emiryanvl.reportservice.config.ReportProperties
 import com.emiryanvl.reportservice.dto.DiskDto
 import com.emiryanvl.reportservice.service.CsvService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.opencsv.CSVWriter
+import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.core.io.FileSystemResource
 import org.springframework.http.*
 import org.springframework.stereotype.Service
@@ -17,7 +19,7 @@ import java.net.URI
 import java.nio.file.Paths
 
 @Service
-class CsvServiceImpl : CsvService {
+class CsvServiceImpl(val reportProperties: ReportProperties) : CsvService {
     override fun convertJsonToCsv(jsonString: String): File {
         val objectMapper = jacksonObjectMapper()
         val disks: List<DiskDto> = objectMapper.readValue(jsonString)
@@ -36,7 +38,8 @@ class CsvServiceImpl : CsvService {
         return csvFile
     }
 
-    override fun uploadCsvFile(url: String, csvFile: File): ResponseEntity<String> {
+    @RabbitListener(queues = ["\${reportQueue.name}"])
+    override fun uploadCsvFile(csvFile: File): ResponseEntity<String> {
         val restTemplate = RestTemplate()
         val fileResource = FileSystemResource(Paths.get(csvFile.absolutePath))
 
@@ -47,7 +50,13 @@ class CsvServiceImpl : CsvService {
         parts.add("file", fileResource)
 
         return restTemplate.exchange(
-                RequestEntity(parts, headers, HttpMethod.POST, URI.create(url)), String::class.java
+                RequestEntity(
+                    parts,
+                    headers,
+                    HttpMethod.POST,
+                    URI.create(reportProperties.reportUrl)
+                ),
+                String::class.java
         )
     }
 }

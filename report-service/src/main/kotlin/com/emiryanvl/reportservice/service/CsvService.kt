@@ -5,5 +5,5 @@ import java.io.File
 
 interface CsvService {
     fun convertJsonToCsv(jsonString: String): File
-    fun uploadCsvFile(url: String, csvFile: File): ResponseEntity<String>
+    fun uploadCsvFile(csvFile: File): ResponseEntity<String>
 }

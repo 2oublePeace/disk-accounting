@@ -1,3 +1,9 @@
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_DEFAULT_USER}
+    password: ${RABBITMQ_DEFAULT_PASS}
 storage-url: http://storage:8080/storage/upload
 report-url: http://gateway:8083/main/disk
 server:

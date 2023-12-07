@@ -11,6 +11,16 @@ services:
     expose:
       - 5432
 
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+    expose:
+      - 5672
+
   main:
     build:
       context: .
